@@ -14,7 +14,7 @@
         "output: pdf_document\n",
         "---"
       ],
-      "id": "6a8d7d84"
+      "id": "c3a19d1f"
     },
     {
       "cell_type": "code",
@@ -44,7 +44,7 @@
         "\n",
         "plt.style.use('ggplot')"
       ],
-      "id": "3022f619",
+      "id": "7d0543c5",
       "execution_count": null,
       "outputs": []
     },
@@ -67,7 +67,7 @@
         "\n",
         "### Question 1 \n"
       ],
-      "id": "5a67f8d3"
+      "id": "e36f6d32"
     },
     {
       "cell_type": "code",
@@ -98,7 +98,7 @@
         "      (clf_linear.score(X_train, y_train),\n",
         "       clf_linear.score(X_test, y_test)))"
       ],
-      "id": "d1c2cbeb",
+      "id": "2a443dce",
       "execution_count": null,
       "outputs": []
     },
@@ -112,7 +112,7 @@
         "\n",
         "### Question 2 \n"
       ],
-      "id": "682bfe2a"
+      "id": "9d01c10d"
     },
     {
       "cell_type": "code",
@@ -143,7 +143,7 @@
         "      (clf_poly.score(X_train, y_train),\n",
         "       clf_poly.score(X_test, y_test)))"
       ],
-      "id": "053f24f0",
+      "id": "73921a36",
       "execution_count": null,
       "outputs": []
     },
@@ -155,7 +155,7 @@
         "\n",
         "### Visualisation de la classification \n"
       ],
-      "id": "6b6d68cc"
+      "id": "97c9c6bd"
     },
     {
       "cell_type": "code",
@@ -187,7 +187,7 @@
         "plt.tight_layout()\n",
         "plt.draw()"
       ],
-      "id": "938f097b",
+      "id": "d4ab53dd",
       "execution_count": null,
       "outputs": []
     },
@@ -211,7 +211,7 @@
         "\n",
         "Nous avons ici 12 visages correspondant à ces 2 personnes.\n"
       ],
-      "id": "c910be72"
+      "id": "564d9645"
     },
     {
       "cell_type": "code",
@@ -250,7 +250,7 @@
         "X -= np.mean(X, axis=0)\n",
         "X /= np.std(X, axis=0)"
       ],
-      "id": "0e0bf851",
+      "id": "cd1d2ae0",
       "execution_count": null,
       "outputs": []
     },
@@ -276,7 +276,7 @@
         "print(\"Score sans variable de nuisance\")\n",
         "run_svm_cv(X,y)"
       ],
-      "id": "58fef588",
+      "id": "ee762026",
       "execution_count": null,
       "outputs": []
     },
@@ -293,7 +293,7 @@
         "\n",
         "Nous allons maintenant montrez l’influence de ce paramètre de régularisation C en le faisant varier sur une échelle logarithmique entre 1e5 et 1e-5.\n"
       ],
-      "id": "c8b58132"
+      "id": "55b1a9e9"
     },
     {
       "cell_type": "code",
@@ -331,7 +331,7 @@
         "plt.grid()\n",
         "plt.show()"
       ],
-      "id": "59e839e0",
+      "id": "0be23ff8",
       "execution_count": null,
       "outputs": []
     },
@@ -347,7 +347,7 @@
         "### Question 5 :\n",
         "Nous allons voir maintenant l'influence des variables de nuissance sur le score. \n"
       ],
-      "id": "a624c4cd"
+      "id": "b539f292"
     },
     {
       "cell_type": "code",
@@ -375,7 +375,7 @@
         "plt.grid()\n",
         "plt.show()"
       ],
-      "id": "4e989976",
+      "id": "0509678a",
       "execution_count": null,
       "outputs": []
     },
@@ -391,7 +391,7 @@
         "\n",
         "Nous allons maintenant essayer d'améliorer la prédiction à l'aide d'une réduction de dimension basé sur la PCA.\n"
       ],
-      "id": "e27c1886"
+      "id": "a63ec956"
     },
     {
       "cell_type": "code",
@@ -446,7 +446,7 @@
         "plt.grid()\n",
         "plt.show()"
       ],
-      "id": "d11ca8a5",
+      "id": "5c6065cc",
       "execution_count": null,
       "outputs": []
     }

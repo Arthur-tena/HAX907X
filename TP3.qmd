@@ -276,7 +276,7 @@ X_noisy = X_noisy[np.random.permutation(X.shape[0])]
 print(run_svm_cv(X_noisy,y))
 C_values, train_errors, test_errors = run_svm_cv2(X_noisy, y)
 
-# Tracer l'erreur de prédiction en fonction de C
+
 plt.figure(figsize=(10, 6))
 plt.semilogx(C_values, train_errors, label='Erreur d\'entraînement', marker='o')
 plt.semilogx(C_values, test_errors, label='Erreur de test', marker='o')
