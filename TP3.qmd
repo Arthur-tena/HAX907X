@@ -1,0 +1,348 @@
+---
+title: "TP3 SVM"
+author: "Arthur TENA"
+format: pdf
+toc: true            
+toc-depth: 3
+pdf-engine: xelatex
+output: pdf_document
+---
+
+```{python}
+#| echo: false
+#| include: false
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+
+from svm_source import *
+from sklearn import svm
+from sklearn import datasets
+from sklearn.utils import shuffle
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.datasets import fetch_lfw_people
+from sklearn.decomposition import PCA
+from time import time
+
+scaler = StandardScaler()
+
+import warnings
+warnings.filterwarnings("ignore")
+
+plt.style.use('ggplot')
+```
+
+# Support Vector Machines
+Le \underline{Support Vector Machine} (SVM) est une méthode d'apprentissage supervisé principalement utilisée pour les tâches de classification et, dans certains cas, de régression. 
+
+L'idée principale du SVM est de trouver une frontière ou un hyperplan qui sépare au mieux les différentes classes de données dans un espace à plusieurs dimensions. Pour un problème de classification binaire (deux classes), le SVM cherche à maximiser la marge entre les points les plus proches des deux classes et l'hyperplan séparateur.
+
+Les vecteurs de support sont les points de données qui se trouvent le plus près de l'hyperplan. Ces points déterminent la position et l’orientation de l'hyperplan, car ce sont eux qui contraignent la marge. La marge est définie comme la distance entre ces points critiques et l'hyperplan.
+
+!(SVM.png){width=500}
+
+Nous allons dans un premier temps regarder quelques applications simple de la méthode SVM avec le data set \textit{iris}, puis nous verrons un exemple de classification de visages 
+
+# Partie 1 : exemples d'applications
+
+### Question 1 
+
+```{python}
+#| echo: false
+#| include: false
+
+
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+X = X[y != 0, :2]
+y = y[y != 0]
+X, y = shuffle(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+parameters = {'kernel': ['linear'], 'C': list(np.logspace(-3, 3, 200))}
+
+clf_linear = SVC(kernel='linear')
+clf_linear.fit(X_train, y_train)
+
+# Prédire sur l'ensemble de test
+y_pred = clf_linear.predict(X_test)
+
+# check your score
+print('Generalization score for linear kernel: %s, %s' %
+      (clf_linear.score(X_train, y_train),
+       clf_linear.score(X_test, y_test)))
+```
+
+Le score sur les données d'entraînements est de 0.74 ce qui signifie que le modèle à classifié correctement 74% des exemples de l'ensemble de test ou de validation.
+Le score obtenu sur les données de test est de 0,66, ce qui correspond à un taux de classification correcte de 66 %. Cela indique que le modèle a moins bien réussi à classer les données de test par rapport aux données d'entraînement ou de validation.
+Nous pouvons donc nous dire que la classification linéaire est "trop simple" est qu'un autre noyau est peut être plus adapté à nos données. C'est ce que nous allons voir dans la question 2 avec un noyau polynomial.
+
+### Question 2 
+
+```{python}
+#| echo: false
+X = iris.data
+y = iris.target
+X = X[y != 0, :2]
+y = y[y != 0]
+X, y = shuffle(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+Cs = list(np.logspace(-3, 3, 5))
+gammas = 10. ** np.arange(1, 2)
+degrees = np.r_[1, 2, 3]
+
+parameters = {'kernel': ['poly'], 'C': Cs, 'gamma': gammas, 'degree': degrees}
+
+clf_poly = SVC(kernel='poly')
+clf_poly.fit(X_train, y_train)
+
+# Prédire sur l'ensemble de test
+y_pred = clf_poly.predict(X_test)
+
+# check your score
+print('Generalization score for polynomial kernel: %s, %s' %
+      (clf_poly.score(X_train, y_train),
+       clf_poly.score(X_test, y_test)))
+```
+
+Nous nous retrouvons maintenant avec un score de 0.7 avec un noyau polynomial pour les données d'entrainement et un score de 0.76 pour les données de tests. C'est mieux que pour le noyau linéaire pour les données de tests mais moins bon pour les données d'entraînement.
+
+### Visualisation de la classification 
+
+```{python}
+#| echo: false
+def f_linear(xx):
+    """Classifier: needed to avoid warning due to shape issues"""
+    return clf_linear.predict(xx.reshape(1, -1))
+
+def f_poly(xx):
+    """Classifier: needed to avoid warning due to shape issues"""
+    return clf_poly.predict(xx.reshape(1, -1))
+
+plt.ion()
+plt.figure(figsize=(15, 5))
+plt.subplot(131)
+plot_2d(X, y)
+plt.title("iris dataset")
+
+plt.subplot(132)
+frontiere(f_linear, X, y)
+plt.title("linear kernel")
+
+plt.subplot(133)
+frontiere(f_poly, X, y)
+
+plt.title("polynomial kernel")
+plt.tight_layout()
+plt.draw()
+``` 
+
+- Le graphique de gauche représente notre jeu de donnée 'Iris' et plus particulièrement, la variable "sepal.width" de Iris.
+
+- Le graphique du milieu corresponds à la classification du jeu de donnée par la méthode SVM avec un noyau linéaire. La ligne diagonale représente la frontière de séparation linéaire entre les deux classes. Les zones colorées en bleu et orange correspondent aux régions où le modèle prévoit chaque classe.On remarque que la frontière est une ligne droite, ce qui est caractéristique d'un noyau linéaire. Cependant, on observe également que plusieurs points de chaque classe se trouvent de l'autre côté de la frontière, ce qui indique que le noyau linéaire a du mal à séparer parfaitement les classes qui se chevauchent.
+
+- Le graphique de droite corresponds à la classification du jeu de donnée par la méthode SVM avec un noyau polynomial. On peut voir que la région en bleu et orange est moins simplement séparée, et le modèle semble mieux classer certains des points proches de la frontière par rapport au modèle linéaire.
+
+\textbf{Conclusion :} Le noyau polynomial nous semble plus adapté aux différents jeu de données car il est plus complexe et permet une plus grande flexibilité pour la frontière car n'étant pas forcément linéaire. Cependant, dans notre cas, nous avons observé que la différence entre les deux scores n'était pas significative. Cela pourrait s'expliquer par la variable "sepal.width" du jeu de données Iris, qui permet une bonne séparation des deux classes à l'aide d'une simple ligne droite.
+
+## Classification des visages 
+
+L'exemple suivant est un problème de classification de visages. Nous utilisons une base de donnée qui nous a été fournie et dans cette partie, nous nous concentrerons sur 2 personnes : 'Tony Blair' et 'Colin Powell'.
+
+### Question 4
+
+Nous avons ici 12 visages correspondant à ces 2 personnes.
+
+```{python}
+#| echo: false
+# Download the data and unzip; then load it as numpy arrays
+lfw_people = fetch_lfw_people(min_faces_per_person=70, resize=0.4,
+                              color=True, funneled=False, slice_=None,
+                              download_if_missing=True)
+# data_home='.'
+
+# introspect the images arrays to find the shapes (for plotting)
+images = lfw_people.images
+n_samples, h, w, n_colors = images.shape
+
+# the label to predict is the id of the person
+target_names = lfw_people.target_names.tolist()
+
+####################################################################
+# Pick a pair to classify such as
+names = ['Tony Blair', 'Colin Powell']
+#names = ['Donald Rumsfeld', 'Colin Powell']
+
+idx0 = (lfw_people.target == target_names.index(names[0]))
+idx1 = (lfw_people.target == target_names.index(names[1]))
+images = np.r_[images[idx0], images[idx1]]
+n_samples = images.shape[0]
+y = np.r_[np.zeros(np.sum(idx0)), np.ones(np.sum(idx1))].astype(int)
+
+# plot a sample set of the data
+plot_gallery(images, np.arange(12))
+plt.show()
+
+X = (np.mean(images, axis=3)).reshape(n_samples, -1)
+X -= np.mean(X, axis=0)
+X /= np.std(X, axis=0)
+```
+
+```{python}
+#| echo: false
+def run_svm_cv(_X, _y):
+    _indices = np.random.permutation(_X.shape[0])
+    _train_idx, _test_idx = _indices[:_X.shape[0] // 2], _indices[_X.shape[0] // 2:]
+    _X_train, _X_test = _X[_train_idx, :], _X[_test_idx, :]
+    _y_train, _y_test = _y[_train_idx], _y[_test_idx]
+
+    _parameters = {'kernel': ['linear'], 'C': list(np.logspace(-5, 5, 11))}
+    _svr = svm.SVC()
+    _clf_linear = GridSearchCV(_svr, _parameters)
+    _clf_linear.fit(_X_train, _y_train)
+
+    print('Generalization score for linear kernel: %s, %s \n' %
+          (_clf_linear.score(_X_train, _y_train), _clf_linear.score(_X_test, _y_test)))
+
+print("Score sans variable de nuisance")
+run_svm_cv(X,y)
+```
+
+\textit{Rappels} : 
+- Le score est le pourcentage de classification correcte. L'erreur est donc calculée en faisant 1-score.
+- Le paramètre C contrôle la complexité du classifieur dans la mesure où il détermine le coût d’une
+mauvaise classification : plus C est grand, plus la règle obtenue est complexe (le nombre de points pour
+lesquels on veut minimiser l’erreur de classification croît).
+
+
+Nous allons maintenant montrez l’influence de ce paramètre de régularisation C en le faisant varier sur une échelle logarithmique entre 1e5 et 1e-5.
+
+
+```{python}
+def run_svm_cv2(X, y):
+    _C_values = np.logspace(-5, 5, 11) 
+    train_errors = []
+    test_errors = []
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=42)
+
+    for C in _C_values:
+        clf = svm.SVC(kernel='linear', C=C)
+        
+        clf.fit(X_train, y_train)
+        
+        train_score = clf.score(X_train, y_train)
+        test_score = clf.score(X_test, y_test)
+
+        train_errors.append(1 - train_score)
+        test_errors.append(1 - test_score)   
+
+    return _C_values, train_errors, test_errors
+
+C_values, train_errors, test_errors = run_svm_cv2(X, y)
+
+plt.figure(figsize=(10, 6))
+plt.semilogx(C_values, train_errors, label='Erreur d\'entraînement', marker='o')
+plt.semilogx(C_values, test_errors, label='Erreur de test', marker='o')
+plt.xlabel('Paramètre de régularisation C')
+plt.ylabel('Erreur de prédiction')
+plt.title('Influence du paramètre de régularisation C sur l\'erreur de prédiction')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+Quand la valeur de C est petite l'erreur sur les données d'entrainement et de test est grande (dee l'ordre de 0.4) et plus la valeur de C augmente, plus l'erreur diminue pour se stabilisé à 0.1 pour l'erreur sur les données de test à partir de C= 1e-3. Cette tendance est aussi vérifié pour l'erreur sur les données de tests, mais cette fois, l'erreur se stabilise autour de 0 à partir de C=1e-3.
+C'est ce que nous avons vu plus haut avec le score sans variable de nuissance où nous avions un score qui se stabilisait à 1 et un score sur les données d'entrainement d'environ 0.93.
+
+
+
+### Question 5 :
+Nous allons voir maintenant l'influence des variables de nuissance sur le score. 
+
+```{python}
+#| echo: false
+print("Score avec variable de nuisance")
+n_features = X.shape[1]
+# On rajoute des variables de nuisances
+sigma = 1
+noise = sigma * np.random.randn(n_samples, 300, )
+X_noisy = np.concatenate((X, noise), axis=1)
+X_noisy = X_noisy[np.random.permutation(X.shape[0])]
+print(run_svm_cv(X_noisy,y))
+C_values, train_errors, test_errors = run_svm_cv2(X_noisy, y)
+
+# Tracer l'erreur de prédiction en fonction de C
+plt.figure(figsize=(10, 6))
+plt.semilogx(C_values, train_errors, label='Erreur d\'entraînement', marker='o')
+plt.semilogx(C_values, test_errors, label='Erreur de test', marker='o')
+plt.xlabel('Paramètre de régularisation C')
+plt.ylabel('Erreur de prédiction')
+plt.title('Influence des variables de nuisance sur l\'erreur de prédiction')
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+On remarque tout d'abord que le score a drastiquement diminué, il atteint 0.61 pour le score de test et 0.64 pour le score sur les données d'entraînement.
+
+Sur le graphique, nous nous rendons compte de l'influence du paramètre de régularisation, une nouvelle fois, l'erreur de précision sur les données d'entraînement se stabilise à 0 à partir de C=1e-3. Pour l'erreur sur les données de test par contre, il se stabiliuse autour de 0.45 à partir de C=1e-2. Cela suggère que le modèle est trop influencé par les variables de nuisance.
+
+### Question 6 :
+
+Nous allons maintenant essayer d'améliorer la prédiction à l'aide d'une réduction de dimension basé sur la PCA.
+
+```{python}
+#| echo: false
+def run_svm_cv(X, y, n_components):
+    # Réduction de dimension avec PCA
+    pca = PCA(n_components=n_components)
+    X_reduced = pca.fit_transform(X)
+    
+    # Division des données
+    indices = np.random.permutation(X_reduced.shape[0])
+    train_idx, test_idx = indices[:X_reduced.shape[0] // 2], indices[X_reduced.shape[0] // 2:]
+    X_train, X_test = X_reduced[train_idx, :], X_reduced[test_idx, :]
+    y_train, y_test = y[train_idx], y[test_idx]
+    
+    # Paramètres pour le SVM
+    parameters = {'kernel': ['linear'], 'C': list(np.logspace(-5, 5, 11))}
+    svr = svm.SVC()
+    clf = GridSearchCV(svr, parameters)
+    clf.fit(X_train, y_train)
+
+    # Scores
+    train_score = clf.score(X_train, y_train)
+    test_score = clf.score(X_test, y_test)
+
+    return train_score, test_score
+
+# Exemple d'utilisation
+n_components_list = [5, 10, 20, 50]
+train_errors = []
+test_errors = []
+
+# Charger vos données
+# Assurez-vous que X_noisy et y sont déjà définis
+for n_components in n_components_list:
+    train_score, test_score = run_svm_cv(X_noisy, y, n_components)
+    train_errors.append(1 - train_score)  # erreur = 1 - score
+    test_errors.append(1 - test_score)
+
+# Tracer les résultats
+plt.figure(figsize=(10, 6))
+plt.plot(n_components_list, train_errors, marker='o', label="Erreur d'entraînement")
+plt.plot(n_components_list, test_errors, marker='o', label="Erreur de test")
+plt.xscale('linear')
+plt.xticks(n_components_list)
+plt.xlabel("Nombre de composants (n_components)")
+plt.ylabel("Erreur de prédiction")
+plt.title("Influence de la réduction de dimension sur l'erreur de prédiction")
+plt.legend()
+plt.grid()
+plt.show()
+```
