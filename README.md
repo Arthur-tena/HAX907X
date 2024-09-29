@@ -4,11 +4,13 @@
 Contact : arthur.tena@etu.umontpellier.fr
 
 Ce dépôt git contient les fichiers suivant :
-- **TP3.qmd** qui contient la rédaction de mon TP
+- **TP3.qmd** qui contient la rédaction de mon TP avec le code.
 - **.gitignore** pour que le dépôt reste propre
-- **TP3.html** contenant mon rendu final
+- **TP3.pdf** contenant mon rendu final.
+- **main.tex** contenant mon rendu final sous format tex.
 - **svm_source.py** contenant des fichiers utilent pour le TP.
-- **svm_gui.py** qui est un fichier python qui lance une application permetant en temps réel d’évaluer l’impact du choix du noyau et du paramètre de régularisation C
+- **svm_gui.py** qui est un fichier python qui lance une application permetant en temps réel d’évaluer l’impact du choix du noyau et du paramètre de régularisation C.
+- **Dossier Plots** contenant les différents plots visible sur le fichier TP3.tex.
 
 ## A propos de la méthode SVM :
 Les SVM ont été introduites par Vapnik. La popularité des méthodes SVM, pour

@@ -5,7 +5,7 @@ format: pdf
 toc: true            
 toc-depth: 3
 pdf-engine: xelatex
-output: pdf_document
+output: html_document
 ---
 
 ```{python}
